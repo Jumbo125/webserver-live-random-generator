@@ -38,6 +38,44 @@ Besitz eines geheimen Links (wie bei einem freigegebenen Cloud-Dokument).
 
 ## Wie es technisch genau abläuft
 
+### 0. Wie der Token erzeugt wird
+
+Jeder der beiden Tokens (Zuschauer und Ersteller) entsteht durch genau einen
+Aufruf:
+
+```php
+// src/bootstrap.php
+function new_secret_token(): string
+{
+    return bin2hex(random_bytes(32));
+}
+```
+
+- **`random_bytes(32)`** liefert 32 **echte Zufallsbytes** aus dem
+  kryptografisch sicheren Zufallsgenerator (CSPRNG) des Betriebssystems
+  (unter Linux `/dev/urandom`, unter Windows `CryptGenRandom`/`BCryptGenRandom`).
+  Das ist bewusst **nicht** `rand()` oder `mt_rand()` — jene erzeugen
+  vorhersagbare Pseudozufallsfolgen, die sich bei Kenntnis des internen
+  Zustands (Seed) rekonstruieren lassen. Für ein Sicherheits-Token wäre das
+  ein Problem, für reine Zufallszahlen in der Ziehung selbst nicht.
+- **`bin2hex(...)`** wandelt die 32 Rohbytes nur in eine lesbare,
+  URL-taugliche Zeichenkette aus 64 Hex-Zeichen (`0`–`9`, `a`–`f`) um —
+  das verändert die Zufälligkeit nicht, es ist nur Darstellung.
+- **Entropie:** 32 Byte = 256 Bit Zufall. Die Anzahl möglicher Werte ist
+  2²⁵⁶ — selbst mit sehr vielen Versuchen pro Sekunde ist Erraten oder
+  Durchprobieren praktisch ausgeschlossen (es gibt schlicht keinen
+  Angriffsweg außer Erraten, da der Wert nirgends abgeleitet, sondern rein
+  zufällig erzeugt wird).
+- Jede Sitzung bekommt **zwei unabhängig gewürfelte** solche Tokens
+  (`viewer_token` für `live.php`, `creator_token` für `control.php`) —
+  der eine lässt sich nicht aus dem anderen berechnen, da beide völlig
+  unabhängige Zufallswerte sind.
+
+Dieser Token *ist* bereits das Zugangsgeheimnis — es gibt kein Passwort und
+keinen Login dahinter. Wer den Token (bzw. den Link oder QR-Code, die ihn
+enthalten) kennt, hat Zugriff; wer ihn nicht kennt, kann ihn praktisch nicht
+erraten.
+
 ### 1. Sitzung erstellen — welche Dateien dabei entstehen
 
 Pro **Sitzung** (nicht pro einzelner Ziehung!) entstehen genau zwei JSON-Dateien
