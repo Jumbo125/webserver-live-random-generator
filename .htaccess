@@ -1,0 +1,6 @@
+# Verzeichnislisting im gesamten Projekt deaktivieren (gilt für Unterordner,
+# sofern diese keine eigene, strengere .htaccess haben).
+Options -Indexes
+
+# Zusätzliche Absicherung, falls IndexIgnore vom Hosting respektiert wird.
+IndexIgnore *

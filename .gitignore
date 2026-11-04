@@ -1,0 +1,21 @@
+# Lokale/geheime Konfiguration (Vorlagen *.example.php bleiben versioniert)
+/config.php
+/config.turnstile.php
+
+# Enthält echte Adresse/Name (Vorlage impressum.example.php bleibt versioniert)
+/impressum.php
+
+# Referenzdatei aus der Projekterstellung, nicht Teil der eigentlichen App
+/matrix_zahlen_live.html
+
+# Laufzeitdaten: JSON-Sitzungen, Lockdateien, Rate-Limit-Zähler
+/private/live-draw/*
+!/private/live-draw/.htaccess
+
+# Lokal gebündelte Drittanbieter-Bibliotheken (nicht Teil des eigenen Codes).
+# Siehe assets/vendor/README.md für Quellen zum erneuten Herunterladen.
+/assets/vendor/*
+!/assets/vendor/README.md
+
+# Internes Planungsdokument für die Projekterstellung, nicht Teil der App
+/zufallsgenerator_anleitung_v2.md
