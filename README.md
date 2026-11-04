@@ -226,8 +226,6 @@ flowchart TB
 
     TKA --> MA["mulberry32(seed + tick_A) → Zwischenzahl"]
     TKB --> MB["mulberry32(seed + tick_B) → Zwischenzahl"]
-
-    MA -. "tick_A ≈ tick_B, da progress_A ≈ progress_B" .- MB
 ```
 
 Weil `progress_A` und `progress_B` (fast) gleich sind, landen beide Browser
