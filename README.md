@@ -208,26 +208,30 @@ genaueste Schätzung des Zeit-Offsets zwischen eigener Uhr und Serveruhr.
 
 ```mermaid
 flowchart TB
-    subgraph Server["Server (einmal pro Runde)"]
-        R["random_int Ergebnis<br/>+ animation_seed<br/>+ start_at_ms, duration_ms"]
+    R["Server, einmal pro Runde:<br/>random_int Ergebnis<br/>+ animation_seed<br/>+ start_at_ms, duration_ms"]
+
+    subgraph BrowserA["Browser A"]
+        direction TB
+        OA["eigener Zeit-Offset A<br/>(mehrere Messungen, niedrigste RTT)"]
+        PA["progress_A = (Date.now+Offset_A − start_at_ms) / duration_ms"]
+        TKA["tick_A = ease(progress_A) * 36"]
+        MA["mulberry32(seed + tick_A) → Zwischenzahl"]
+        OA --> PA --> TKA --> MA
     end
 
-    R -->|Polling| A["Browser A"]
-    R -->|Polling| B["Browser B"]
+    subgraph BrowserB["Browser B"]
+        direction TB
+        OB["eigener Zeit-Offset B<br/>(mehrere Messungen, niedrigste RTT)"]
+        PB["progress_B = (Date.now+Offset_B − start_at_ms) / duration_ms"]
+        TKB["tick_B = ease(progress_B) * 36"]
+        MB["mulberry32(seed + tick_B) → Zwischenzahl"]
+        OB --> PB --> TKB --> MB
+    end
 
-    A --> OA["eigener Zeit-Offset A<br/>(aus mehreren Messungen, niedrigste RTT)"]
-    B --> OB["eigener Zeit-Offset B"]
+    R -->|Polling| OA
+    R -->|Polling| OB
 
-    OA --> PA["progress_A = (Date.now+Offset_A − start_at_ms) / duration_ms"]
-    OB --> PB["progress_B = (Date.now+Offset_B − start_at_ms) / duration_ms"]
-
-    PA --> TA["tick_A = ease(progress_A) * 36"]
-    PB --> TB["tick_B = ease(progress_B) * 36"]
-
-    TA --> MA["mulberry32(seed + tick_A) → Zwischenzahl"]
-    TB --> MB["mulberry32(seed + tick_B) → Zwischenzahl"]
-
-    MA -. "tick_A ≈ tick_B, da progress_A ≈ progress_B" .- MB
+    MA -.->|"tick_A ≈ tick_B, da progress_A ≈ progress_B"| MB
 ```
 
 Weil `progress_A` und `progress_B` (fast) gleich sind, landen beide Browser
