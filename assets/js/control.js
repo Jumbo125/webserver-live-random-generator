@@ -40,6 +40,22 @@
     startBtn.disabled = active;
   };
 
+  // Wird von draw-view.js erst am "harten Cut" aufgerufen, wenn die Animation
+  // zu Ende ist und das echte Ergebnis angezeigt wird (nicht schon direkt nach
+  // dem Start-Request) — erst dann zur Ausschlussliste hinzufügen, damit die
+  // Zahl im Eingabefeld nicht vor Animationsende auftaucht.
+  window.onDrawResult = function (round) {
+    if (!excludedEnabled.checked) {
+      return;
+    }
+    const result = String(round.result);
+    const current = excludedInput.value.split(/[;,\s]+/).filter(Boolean);
+    if (current.indexOf(result) === -1) {
+      current.push(result);
+      excludedInput.value = current.join(';');
+    }
+  };
+
   startBtn.addEventListener('click', function () {
     startError.classList.add('d-none');
     startBtn.disabled = true;
@@ -65,19 +81,9 @@
           return body;
         });
       })
-      .then(function (body) {
+      .then(function () {
         if (window.drawViewInstance) {
           window.drawViewInstance.refresh();
-        }
-        // Gezogene Zahl automatisch zur Ausschlussliste hinzufügen, damit sie
-        // bei der nächsten Ziehung nicht mehr vorkommt (Liste bleibt editierbar).
-        if (excludedEnabled.checked) {
-          const result = String(body.round.result);
-          const current = excludedInput.value.split(/[;,\s]+/).filter(Boolean);
-          if (current.indexOf(result) === -1) {
-            current.push(result);
-            excludedInput.value = current.join(';');
-          }
         }
       })
       .catch(function (err) {

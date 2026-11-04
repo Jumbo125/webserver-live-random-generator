@@ -1,5 +1,7 @@
 # Live-Zufallsgenerator
 
+<img src="assets/favicon/web-app-manifest-192x192.png" alt="Logo" width="96" height="96">
+
 ![License: GPL v3](https://img.shields.io/badge/license-GPLv3-blue.svg)
 ![PHP](https://img.shields.io/badge/PHP-8.2%2B-777bb4.svg)
 ![No Database](https://img.shields.io/badge/database-none-lightgrey.svg)
@@ -258,6 +260,31 @@ Zahlenfolge — für den, der den Seed kennt, ist das Ergebnis also gar nicht
 zufällig, sondern exakt vorhersagbar. Für einen Außenstehenden, der den Seed
 nicht kennt, wirkt die Zahl trotzdem völlig willkürlich.
 
+Drei Fragen, die ich mir dabei selbst gestellt (und beantwortet) habe:
+
+**Was ist die `tick`-Variable genau?** Einfach ein Zähler von 0 bis 36, der
+angibt, an welcher von 36 Zwischenstationen der Animation man gerade steht.
+Er wird nicht hochgezählt, sondern bei jedem Frame neu aus dem aktuellen
+Zeitfortschritt berechnet — deshalb kommen alle (synchronisierten) Browser
+auf denselben Wert, ohne sich abzusprechen.
+
+**Was ist das "ease"?** Eine kleine Formel (`1 - (1-progress)³`), die den
+Zeitfortschritt verzerrt, statt ihn 1:1 in `tick` umzurechnen: am Anfang der
+Runde steigt sie schnell (→ `tick` wechselt oft → Zahl flackert schnell),
+gegen Ende steigt sie nur noch langsam (→ `tick` bleibt länger gleich → Zahl
+wechselt seltener). Das erzeugt den "wird langsamer"-Effekt am Schluss der
+Animation, rein optisch, ohne Einfluss auf das echte Ergebnis.
+
+**Warum kommt aus der langen Mulberry-Zeichenkette am Ende eine Zahl heraus,
+die genau im Min/Max-Bereich liegt?** Weil das in zwei Schritten passiert.
+Mulberry32 liefert zuerst nur eine Dezimalzahl zwischen 0 und 1 — noch ganz
+ohne Bezug zu `min`/`max`. Erst danach wird das umgerechnet:
+`min + Math.floor(zufallszahl * (max - min + 1))`. Die Zufallszahl (0 bis 1)
+wird auf die Breite des Zahlenbereichs gestreckt, abgerundet auf eine
+Ganzzahl, und dann um `min` verschoben. Dadurch landet das Ergebnis
+rechnerisch immer exakt zwischen `min` und `max`, egal wie "lang" oder
+kryptisch der Zwischenwert von Mulberry32 selbst aussieht.
+
 ## Voraussetzungen
 
 - PHP 8.2+, HTTPS.
@@ -277,14 +304,10 @@ nicht kennt, wirkt die Zahl trotzdem völlig willkürlich.
    kopieren und mit echten Cloudflare-Turnstile-Keys befüllen (siehe
    Abschnitt „Cloudflare Turnstile“ unten). Ohne diesen Schritt bleibt
    Turnstile deaktiviert, die Anwendung funktioniert trotzdem normal.
-5. `impressum.example.php` nach `impressum.php` kopieren und mit den
-   eigenen Angaben (Name, Adresse, ggf. Kontakt) befüllen. Ohne diesen
-   Schritt fehlt die Datei, und der Impressum-Link im Footer führt auf eine
-   404-Seite.
-6. **Falls das Hosting einen Ordner außerhalb des Webroots erlaubt**: das
+5. **Falls das Hosting einen Ordner außerhalb des Webroots erlaubt**: das
    Verzeichnis `private/live-draw` (und idealerweise auch `config.php`) dorthin
    verschieben und den Pfad in `config.php` entsprechend anpassen.
-7. Falls nur ein Webroot zur Verfügung steht: sicherstellen, dass die dort
+6. Falls nur ein Webroot zur Verfügung steht: sicherstellen, dass die dort
    automatisch angelegte Datei `private/live-draw/.htaccess`
    (`Require all denied` / `Deny from all`) tatsächlich wirkt – im Browser
    `https://deine-domain/private/live-draw/.htaccess` aufrufen und einen
@@ -293,11 +316,11 @@ nicht kennt, wirkt die Zahl trotzdem völlig willkürlich.
    gesperrt werden. Dasselbe gilt für `src/.htaccess` und
    `partials/.htaccess` (reine PHP-Includes, nie direkt aufzurufen) sowie die
    `Options -Indexes`-Regel in der Root-`.htaccess` gegen Verzeichnislisting.
-8. Schreibrechte prüfen: Das erste Erstellen einer Sitzung legt automatisch
+7. Schreibrechte prüfen: Das erste Erstellen einer Sitzung legt automatisch
    die Unterordner `sessions/`, `creators/`, `ratelimit/` sowie die
    `.htaccess`-Datei an (Verzeichnisse `0700`, Dateien `0600`, soweit vom
    Hosting unterstützt).
-9. `index.php` im Browser öffnen und eine Testsitzung erstellen.
+8. `index.php` im Browser öffnen und eine Testsitzung erstellen.
 
 ## Sicherheitsmodell (ohne Login)
 

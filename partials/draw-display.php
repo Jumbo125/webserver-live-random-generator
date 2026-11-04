@@ -41,6 +41,11 @@
       onActiveChange = window.onDrawActiveChange;
     }
 
+    let onResult;
+    if (typeof window.onDrawResult === 'function') {
+      onResult = window.onDrawResult;
+    }
+
     window.drawViewInstance = window.DrawView.create({
       token: <?= json_encode($viewerToken) ?>,
       apiUrl: 'api/session.php',
@@ -53,7 +58,8 @@
         statusLine: document.getElementById('status-line'),
         connectionBanner: document.getElementById('connection-banner')
       },
-      onActiveChange: onActiveChange
+      onActiveChange: onActiveChange,
+      onResult: onResult
     });
   });
 </script>

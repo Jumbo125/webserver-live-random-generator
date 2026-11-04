@@ -162,6 +162,9 @@ window.DrawView = (function () {
           renderBigNumber(String(round.result), true);
           stopAnimationLoop();
           notifyActive(false);
+          if (typeof options.onResult === 'function') {
+            options.onResult(round);
+          }
           return;
         }
 
