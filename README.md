@@ -238,7 +238,7 @@ millisekundengenaue Garantie.
 ### 5. Der Seed-Trick in eigenen Worten
 
 *(Diese Zusammenfassung habe ich mir selbst noch einmal in eigenen Worten
-aufgeschrieben, um das System wirklich zu verstehen.)*
+aufgeschrieben, um das System später (in einigen Jahren) noch zu verstehen, ohne ewig den code zu durchforsten. Grund dafür ist der etwas komplizierte Trick, wodurch alle Clients, die gleichen Animationszahlen sehen. Ohne diesem Fetueare wäre es deutlich einfacher, da einfach nur das Ergebnis aus der json gefetcht werden müsste. )*
 
 Der Trick besteht darin, dass bereits **vor** der Animation sowohl das
 Ergebnis als auch der Seed zufällig bestimmt und am Server gespeichert
