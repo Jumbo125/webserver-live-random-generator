@@ -7,18 +7,18 @@ window.MatrixRain = (function () {
   'use strict';
 
   function create(canvas) {
-    var ctx = canvas.getContext('2d');
-    var streams = [];
-    var size = 17;
-    var columns = 0;
-    var last = 0;
-    var width = 0;
-    var height = 0;
-    var rafId = null;
+    const ctx = canvas.getContext('2d');
+    let streams = [];
+    const size = 17;
+    let columns = 0;
+    let last = 0;
+    let width = 0;
+    let height = 0;
+    let rafId = null;
 
     function resize() {
-      var rect = canvas.parentElement.getBoundingClientRect();
-      var dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
       width = Math.max(1, Math.round(rect.width));
       height = Math.max(1, Math.round(rect.height));
       canvas.width = width * dpr;
@@ -26,7 +26,7 @@ window.MatrixRain = (function () {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       columns = Math.ceil(width / size);
       streams = [];
-      for (var i = 0; i < columns; i++) {
+      for (let i = 0; i < columns; i++) {
         streams.push({
           y: Math.random() * -height / size,
           speed: 0.35 + Math.random() * 1.1,
@@ -42,7 +42,7 @@ window.MatrixRain = (function () {
       if (ts - last < 32) {
         return;
       }
-      var dt = Math.min((ts - last) / 32, 2);
+      const dt = Math.min((ts - last) / 32, 2);
       last = ts;
 
       ctx.fillStyle = 'rgba(0,0,0,.095)';
@@ -50,11 +50,11 @@ window.MatrixRain = (function () {
       ctx.font = '16px monospace';
       ctx.textAlign = 'center';
 
-      for (var i = 0; i < streams.length; i++) {
-        var s = streams[i];
+      for (let i = 0; i < streams.length; i++) {
+        const s = streams[i];
         s.y += s.speed * dt;
-        var x = i * size + size / 2;
-        var y = s.y * size;
+        const x = i * size + size / 2;
+        const y = s.y * size;
 
         ctx.shadowBlur = 0;
         ctx.fillStyle = '#00c944';
@@ -74,7 +74,7 @@ window.MatrixRain = (function () {
       }
     }
 
-    var resizeObserver = null;
+    let resizeObserver = null;
     if (window.ResizeObserver) {
       resizeObserver = new ResizeObserver(resize);
       resizeObserver.observe(canvas.parentElement);
@@ -84,7 +84,7 @@ window.MatrixRain = (function () {
 
     resize();
 
-    var prefersReducedMotion = window.matchMedia &&
+    const prefersReducedMotion = window.matchMedia &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     if (!prefersReducedMotion) {

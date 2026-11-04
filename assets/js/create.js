@@ -1,9 +1,9 @@
 (function () {
   'use strict';
 
-  var form = document.getElementById('create-form');
-  var errorBox = document.getElementById('create-error');
-  var submitBtn = document.getElementById('create-submit');
+  const form = document.getElementById('create-form');
+  const errorBox = document.getElementById('create-error');
+  const submitBtn = document.getElementById('create-submit');
 
   function showError(message) {
     errorBox.textContent = message;
@@ -14,9 +14,12 @@
     event.preventDefault();
     errorBox.classList.add('d-none');
 
-    var turnstileWidget = document.querySelector('.cf-turnstile');
-    var turnstileInput = document.querySelector('[name="cf-turnstile-response"]');
-    var turnstileToken = turnstileInput ? turnstileInput.value : '';
+    const turnstileWidget = document.querySelector('.cf-turnstile');
+    const turnstileInput = document.querySelector('[name="cf-turnstile-response"]');
+    let turnstileToken = '';
+    if (turnstileInput) {
+      turnstileToken = turnstileInput.value;
+    }
 
     if (turnstileWidget && !turnstileToken) {
       showError('Bitte zuerst die Sicherheitsabfrage abschließen.');
@@ -26,7 +29,7 @@
     submitBtn.disabled = true;
     submitBtn.textContent = 'Wird erstellt …';
 
-    var payload = {
+    const payload = {
       title: document.getElementById('title').value,
       min: parseInt(document.getElementById('min').value, 10),
       max: parseInt(document.getElementById('max').value, 10),

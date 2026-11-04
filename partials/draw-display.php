@@ -31,9 +31,14 @@
 
 <script>
   window.addEventListener('DOMContentLoaded', function () {
-    var matrixCanvas = document.getElementById('matrix-canvas');
+    const matrixCanvas = document.getElementById('matrix-canvas');
     if (matrixCanvas && window.MatrixRain) {
       window.MatrixRain.create(matrixCanvas);
+    }
+
+    let onActiveChange;
+    if (typeof window.onDrawActiveChange === 'function') {
+      onActiveChange = window.onDrawActiveChange;
     }
 
     window.drawViewInstance = window.DrawView.create({
@@ -48,7 +53,7 @@
         statusLine: document.getElementById('status-line'),
         connectionBanner: document.getElementById('connection-banner')
       },
-      onActiveChange: typeof window.onDrawActiveChange === 'function' ? window.onDrawActiveChange : undefined
+      onActiveChange: onActiveChange
     });
   });
 </script>

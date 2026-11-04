@@ -87,6 +87,23 @@ plus eine leere Lockdatei:
 | `sessions/<hash>.lock` | leer, nur für `flock()` | `sha256(viewer_token)` |
 | `creators/<hash>.json` | Pointer: enthält den rohen `viewer_token` | `sha256(creator_token)` |
 
+Dazu kommt noch eine dritte, von einzelnen Sitzungen unabhängige Dateiart für
+das Rate-Limit beim Erstellen ([src/bootstrap.php:114-138](src/bootstrap.php#L114-L138)):
+
+| Datei | Inhalt | Dateiname |
+|---|---|---|
+| `ratelimit/<hash>.json` | reine JSON-Liste von Unix-Zeitstempeln (Sekunden), z. B. `[1793730000,1793730041]` — ein Eintrag pro `api/create.php`-Aufruf dieser IP in den letzten 10 Minuten | `sha256("create\|" + IP-Adresse)` |
+
+Wichtig: **Die IP-Adresse selbst steht nirgends im Dateiinhalt**, nur als
+Hash im Dateinamen. Jeder Aufruf von `api/create.php` filtert zuerst alle
+Zeitstempel heraus, die älter als das Zeitfenster (`create_rate_limit_window_s`,
+Standard 600s) sind, prüft dann, ob weniger als `create_rate_limit_count`
+(Standard 10) übrig sind — wenn nicht, wird der Request mit HTTP 429
+abgelehnt — und hängt sonst den aktuellen Zeitstempel an. Diese Dateien
+gehören zu keiner einzelnen Sitzung, sondern zu einer IP-Adresse; sie
+entstehen schon beim ersten `api/create.php`-Versuch, unabhängig davon, ob
+danach tatsächlich eine Sitzung erfolgreich angelegt wird.
+
 ```mermaid
 sequenceDiagram
     participant U as Ersteller-Browser (index.php)
@@ -215,6 +232,31 @@ ganz ohne dass sich die Browser direkt austauschen. Am Ende (`progress ≥ 1`)
 zeigen beide dasselbe, am Server gespeicherte `result`. Kleine Abweichungen
 durch Netzwerklatenz sind möglich; es ist eine gute Näherung, keine
 millisekundengenaue Garantie.
+
+### 5. Der Seed-Trick in eigenen Worten
+
+*(Diese Zusammenfassung habe ich mir selbst noch einmal in eigenen Worten
+aufgeschrieben, um das System wirklich zu verstehen.)*
+
+Der Trick besteht darin, dass bereits **vor** der Animation sowohl das
+Ergebnis als auch der Seed zufällig bestimmt und am Server gespeichert
+werden. Der Zuschauer führt alle 300ms einen Fetch durch und bekommt dabei
+genau diese gezogene Zahl und den Seed mitgeliefert. Jeder Browser erzeugt
+sich daraus selbst einen `tick`, abgeleitet aus der aktuellen Uhrzeit. Weil
+diese Uhrzeit bei allen (synchronisiert) fast gleich ist, haben auch alle
+Browser (fast) denselben `tick`.
+
+Weil Seed und Tick bei allen (nahezu) identisch sind, erzeugt die
+`mulberry32`-Funktion bei allen dieselbe "pseudozufällige" Zwischenzahl
+während der Animation — ganz ohne dass sich die Browser direkt
+austauschen müssten.
+
+**Pseudozufall, Buchseiten-Analogie:** Der Seed ist wie eine Seitenzahl in
+einem dicken Buch mit lauter scheinbar zufälligen Zahlenfolgen. Wer dieselbe
+Seitenzahl bekommt, schlägt immer dieselbe Seite auf und liest dieselbe
+Zahlenfolge — für den, der den Seed kennt, ist das Ergebnis also gar nicht
+zufällig, sondern exakt vorhersagbar. Für einen Außenstehenden, der den Seed
+nicht kennt, wirkt die Zahl trotzdem völlig willkürlich.
 
 ## Voraussetzungen
 

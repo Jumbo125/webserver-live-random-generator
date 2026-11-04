@@ -1,21 +1,21 @@
 (function () {
   'use strict';
 
-  var data = window.CONTROL_DATA;
-  var viewerUrl = new URL('live.php?token=' + encodeURIComponent(data.viewerToken), window.location.href).toString();
+  const data = window.CONTROL_DATA;
+  const viewerUrl = new URL('live.php?token=' + encodeURIComponent(data.viewerToken), window.location.href).toString();
 
-  var urlInput = document.getElementById('viewer-url');
+  const urlInput = document.getElementById('viewer-url');
   urlInput.value = viewerUrl;
 
-  var qr = qrcode(0, 'M');
+  const qr = qrcode(0, 'M');
   qr.addData(viewerUrl);
   qr.make();
   document.getElementById('qr-container').innerHTML = qr.createSvgTag({ cellSize: 5, margin: 4 });
 
   document.getElementById('copy-link-btn').addEventListener('click', function () {
-    var btn = this;
+    const btn = this;
     navigator.clipboard.writeText(viewerUrl).then(function () {
-      var original = btn.textContent;
+      const original = btn.textContent;
       btn.textContent = 'Kopiert!';
       window.setTimeout(function () { btn.textContent = original; }, 1500);
     }).catch(function () {
@@ -23,10 +23,10 @@
     });
   });
 
-  var startBtn = document.getElementById('start-btn');
-  var startError = document.getElementById('start-error');
-  var excludedInput = document.getElementById('excluded-numbers');
-  var excludedEnabled = document.getElementById('excluded-enabled');
+  const startBtn = document.getElementById('start-btn');
+  const startError = document.getElementById('start-error');
+  const excludedInput = document.getElementById('excluded-numbers');
+  const excludedEnabled = document.getElementById('excluded-enabled');
 
   excludedInput.disabled = !excludedEnabled.checked;
   excludedEnabled.addEventListener('change', function () {
@@ -44,12 +44,17 @@
     startError.classList.add('d-none');
     startBtn.disabled = true;
 
+    let excludedValue = '';
+    if (excludedEnabled.checked) {
+      excludedValue = excludedInput.value;
+    }
+
     fetch('api/start.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         creator_token: data.creatorToken,
-        excluded: excludedEnabled.checked ? excludedInput.value : ''
+        excluded: excludedValue
       })
     })
       .then(function (response) {
@@ -67,8 +72,8 @@
         // Gezogene Zahl automatisch zur Ausschlussliste hinzufügen, damit sie
         // bei der nächsten Ziehung nicht mehr vorkommt (Liste bleibt editierbar).
         if (excludedEnabled.checked) {
-          var result = String(body.round.result);
-          var current = excludedInput.value.split(/[;,\s]+/).filter(Boolean);
+          const result = String(body.round.result);
+          const current = excludedInput.value.split(/[;,\s]+/).filter(Boolean);
           if (current.indexOf(result) === -1) {
             current.push(result);
             excludedInput.value = current.join(';');

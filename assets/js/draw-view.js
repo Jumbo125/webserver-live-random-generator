@@ -7,9 +7,9 @@
 window.DrawView = (function () {
   'use strict';
 
-  var FAST_POLL_MS = 300;
-  var SLOW_POLL_MS = 1500;
-  var MAX_BACKOFF_MS = 10000;
+  const FAST_POLL_MS = 300;
+  const SLOW_POLL_MS = 1500;
+  const MAX_BACKOFF_MS = 10000;
 
   function clamp(value, min, max) {
     return Math.max(min, Math.min(max, value));
@@ -18,10 +18,10 @@ window.DrawView = (function () {
   // mulberry32: kleiner, deterministischer PRNG (kein Math.random()), damit
   // alle Browser bei gleichem Seed/Tick exakt dieselbe Zwischenzahl zeigen.
   function mulberry32(seed) {
-    var t = seed >>> 0;
+    let t = seed >>> 0;
     return function () {
       t += 0x6d2b79f5;
-      var x = t;
+      let x = t;
       x = Math.imul(x ^ (x >>> 15), x | 1);
       x ^= x + Math.imul(x ^ (x >>> 7), x | 61);
       return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
@@ -33,30 +33,30 @@ window.DrawView = (function () {
   }
 
   function pseudoNumberForTick(seedInt, tick, min, max) {
-    var rnd = mulberry32(seedInt + tick * 2654435761)();
+    const rnd = mulberry32(seedInt + tick * 2654435761)();
     return min + Math.floor(rnd * (max - min + 1));
   }
 
   function create(options) {
-    var token = options.token;
-    var apiUrl = options.apiUrl;
-    var el = options.elements;
-    var prefersReducedMotion = window.matchMedia &&
+    const token = options.token;
+    const apiUrl = options.apiUrl;
+    const el = options.elements;
+    const prefersReducedMotion = window.matchMedia &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    var offsetSamples = [];
-    var bestOffsetMs = 0;
-    var requestSeq = 0;
-    var latestAppliedSeq = -1;
-    var pollTimer = null;
-    var backoffMs = FAST_POLL_MS;
-    var consecutiveErrors = 0;
+    const offsetSamples = [];
+    let bestOffsetMs = 0;
+    let requestSeq = 0;
+    let latestAppliedSeq = -1;
+    let pollTimer = null;
+    let backoffMs = FAST_POLL_MS;
+    let consecutiveErrors = 0;
 
-    var lastSession = null;
-    var lastRound = null;
-    var animationFrameId = null;
-    var lastTickIndex = -1;
-    var lastActiveState = null;
+    let lastSession = null;
+    let lastRound = null;
+    let animationFrameId = null;
+    let lastTickIndex = -1;
+    let lastActiveState = null;
 
     function notifyActive(active) {
       if (active !== lastActiveState) {
@@ -72,15 +72,15 @@ window.DrawView = (function () {
     }
 
     function recordOffsetSample(sendMs, recvMs, serverNowMs) {
-      var rtt = recvMs - sendMs;
-      var midpoint = sendMs + rtt / 2;
-      var offset = serverNowMs - midpoint;
+      const rtt = recvMs - sendMs;
+      const midpoint = sendMs + rtt / 2;
+      const offset = serverNowMs - midpoint;
       offsetSamples.push({ rtt: rtt, offset: offset });
       if (offsetSamples.length > 5) {
         offsetSamples.shift();
       }
-      var best = offsetSamples[0];
-      for (var i = 1; i < offsetSamples.length; i++) {
+      let best = offsetSamples[0];
+      for (let i = 1; i < offsetSamples.length; i++) {
         if (offsetSamples[i].rtt < best.rtt) {
           best = offsetSamples[i];
         }
@@ -136,17 +136,17 @@ window.DrawView = (function () {
     function startAnimationLoop(session, round) {
       stopAnimationLoop();
       lastTickIndex = -1;
-      var seedInt = seedToInt(round.animation_seed);
-      var totalTicks = 36;
+      const seedInt = seedToInt(round.animation_seed);
+      const totalTicks = 36;
 
       notifyActive(estimatedServerNowMs() < round.end_at_ms);
 
       function frame() {
-        var now = estimatedServerNowMs();
-        var progress = clamp((now - round.start_at_ms) / round.duration_ms, 0, 1);
+        const now = estimatedServerNowMs();
+        const progress = clamp((now - round.start_at_ms) / round.duration_ms, 0, 1);
 
         if (now < round.start_at_ms) {
-          var secondsLeft = Math.ceil((round.start_at_ms - now) / 1000);
+          const secondsLeft = Math.ceil((round.start_at_ms - now) / 1000);
           if (el.statusLine) {
             el.statusLine.textContent = 'Start in ' + secondsLeft + ' s …';
           }
@@ -172,11 +172,11 @@ window.DrawView = (function () {
         if (prefersReducedMotion) {
           renderBigNumber('…', false);
         } else {
-          var eased = 1 - Math.pow(1 - progress, 3);
-          var tickIndex = Math.floor(eased * totalTicks);
+          const eased = 1 - Math.pow(1 - progress, 3);
+          const tickIndex = Math.floor(eased * totalTicks);
           if (tickIndex !== lastTickIndex) {
             lastTickIndex = tickIndex;
-            var num = pseudoNumberForTick(seedInt, tickIndex, session.min, session.max);
+            const num = pseudoNumberForTick(seedInt, tickIndex, session.min, session.max);
             renderBigNumber(String(num), false);
           }
         }
@@ -188,7 +188,7 @@ window.DrawView = (function () {
     }
 
     function applyState(data) {
-      var session = data.session;
+      const session = data.session;
       lastSession = session;
 
       if (session.state === 'invalid') {
@@ -201,8 +201,8 @@ window.DrawView = (function () {
       showOnly('live');
       renderSessionMeta(session);
 
-      var round = data.round;
-      var roundChanged = (round === null && lastRound !== null) ||
+      const round = data.round;
+      const roundChanged = (round === null && lastRound !== null) ||
         (round !== null && (lastRound === null || round.id !== lastRound.id));
 
       lastRound = round;
@@ -224,7 +224,7 @@ window.DrawView = (function () {
 
     function nextPollDelay() {
       if (lastRound && lastSession && lastSession.state === 'ok') {
-        var now = estimatedServerNowMs();
+        const now = estimatedServerNowMs();
         if (now < lastRound.end_at_ms) {
           return FAST_POLL_MS;
         }
@@ -233,8 +233,8 @@ window.DrawView = (function () {
     }
 
     function poll() {
-      var seq = ++requestSeq;
-      var sendMs = Date.now();
+      const seq = ++requestSeq;
+      const sendMs = Date.now();
 
       fetch(apiUrl + '?token=' + encodeURIComponent(token), { cache: 'no-store' })
         .then(function (response) {
@@ -246,7 +246,7 @@ window.DrawView = (function () {
           });
         })
         .then(function (data) {
-          var recvMs = Date.now();
+          const recvMs = Date.now();
           if (seq < latestAppliedSeq) {
             // Ältere, verzögerte Antwort nach einer bereits angewendeten neueren verwerfen.
             return;
@@ -273,7 +273,12 @@ window.DrawView = (function () {
       if (pollTimer !== null) {
         window.clearTimeout(pollTimer);
       }
-      var delay = consecutiveErrors > 0 ? backoffMs : nextPollDelay();
+      let delay;
+      if (consecutiveErrors > 0) {
+        delay = backoffMs;
+      } else {
+        delay = nextPollDelay();
+      }
       pollTimer = window.setTimeout(poll, delay);
     }
 
