@@ -1,6 +1,8 @@
 # Live-Zufallsgenerator
 
-<img style="display:block; margin: 0 auto; width: 40vw;" src="assets/favicon/web-app-manifest-192x192.png" alt="Logo" width="96" height="96">
+<p align="center">
+  <img src="assets/favicon/web-app-manifest-192x192.png" alt="Logo" width="192" height="192">
+</p>
 
 ![License: GPL v3](https://img.shields.io/badge/license-GPLv3-blue.svg)
 ![PHP](https://img.shields.io/badge/PHP-8.2%2B-777bb4.svg)
