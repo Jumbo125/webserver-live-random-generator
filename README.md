@@ -221,11 +221,11 @@ flowchart TB
     OA --> PA["progress_A = (Date.now+Offset_A − start_at_ms) / duration_ms"]
     OB --> PB["progress_B = (Date.now+Offset_B − start_at_ms) / duration_ms"]
 
-    PA --> TA["tick_A = ease(progress_A) * 36"]
-    PB --> TB["tick_B = ease(progress_B) * 36"]
+    PA --> TKA["tick_A = ease(progress_A) * 36"]
+    PB --> TKB["tick_B = ease(progress_B) * 36"]
 
-    TA --> MA["mulberry32(seed + tick_A) → Zwischenzahl"]
-    TB --> MB["mulberry32(seed + tick_B) → Zwischenzahl"]
+    TKA --> MA["mulberry32(seed + tick_A) → Zwischenzahl"]
+    TKB --> MB["mulberry32(seed + tick_B) → Zwischenzahl"]
 
     MA -. "tick_A ≈ tick_B, da progress_A ≈ progress_B" .- MB
 ```
