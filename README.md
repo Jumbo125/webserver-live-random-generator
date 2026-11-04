@@ -329,18 +329,6 @@ Turnstile.
 - Das Rate-Limit auf `api/create.php` ist eine einfache IP-basierte
   Bremse, kein vollständiger Bot-/Abuse-Schutz.
 
-## Syntax-Check
-
-```bash
-php -l index.php
-php -l control.php
-php -l live.php
-php -l impressum.php
-php -l api/*.php
-php -l src/*.php
-php -l partials/*.php
-```
-
 ## Lizenz und Danksagung
 
 Dieses Projekt steht unter der **GNU General Public License v3.0** (siehe
